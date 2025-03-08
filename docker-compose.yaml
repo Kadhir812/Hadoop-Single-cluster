@@ -1,0 +1,74 @@
+services:
+  namenode:
+    build: .
+    container_name: namenode
+    hostname: namenode
+    networks:
+      - hadoop_net
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - namenode_data:/tmp/hadoop-root/dfs/name
+    command: ["namenode"]
+
+  datanode:
+    build: .
+    container_name: datanode
+    hostname: datanode
+    depends_on:
+      - namenode
+    networks:
+      - hadoop_net
+    ports:
+      - "9864:9864"
+    volumes:
+      - datanode_data:/tmp/hadoop-root/dfs/data
+    command: ["datanode"]
+
+  resourcemanager:
+    build: .
+    container_name: resourcemanager
+    hostname: resourcemanager
+    depends_on:
+      - namenode
+    networks:
+      - hadoop_net
+    ports:
+      - "8088:8088"
+    command: ["resourcemanager"]
+
+  nodemanager:
+    build: .
+    container_name: nodemanager
+    hostname: nodemanager
+    depends_on:
+      - resourcemanager
+    networks:
+      - hadoop_net
+    ports:
+      - "8042:8042"
+    command: ["nodemanager"]
+
+  historyserver:
+    build: .
+    container_name: historyserver
+    hostname: historyserver
+    depends_on:
+      - namenode
+    networks:
+      - hadoop_net
+    ports:
+      - "19888:19888"
+    volumes:
+      - historyserver_data:/tmp/hadoop-root/mapred/history
+    command: ["historyserver"]
+
+volumes:
+  namenode_data:
+  datanode_data:
+  historyserver_data:
+
+networks:
+  hadoop_net:
+    driver: bridge
